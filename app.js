@@ -127,3 +127,21 @@ function afficherCommentairesDansPage(comments, userId) {
             </div>`;
     $('#comments-section').html(html);
 }
+
+// Sauvegarde des commentaires affichés dans le localStorage
+$(document).on('click', '.btn-save-comments', function() {
+    let userId = $(this).data('user');
+    let comments = [];
+    // On récupère tous les commentaires actuellement affichés
+    $('.comment-card').each(function() {
+        comments.push({
+            id: $(this).data('comment-id'),
+            name: $(this).find('strong').text(),
+            email: $(this).find('span').first().text(),
+            body: $(this).find('div').last().text()
+        });
+    });
+    // On stocke avec une clé propre à l'utilisateur
+    localStorage.setItem('comments_user_' + userId, JSON.stringify(comments));
+    alert('Commentaires sauvegardés pour l\'utilisateur #' + userId);
+});
