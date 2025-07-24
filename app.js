@@ -59,7 +59,10 @@ function afficherUsersDansPage(users) {
                     <span>${user.email}</span> | 
                     <span>${user.address.city}</span>
                 </div>
-                <button class="btn btn-comments" data-id="${user.id}">Voir les commentaires</button>
+                <div>
+                    <button class="btn btn-comments" data-id="${user.id}">Voir les commentaires</button>
+                    <button class="btn btn-supprimer-user" style="background:#c0392b; margin-left:8px;">Supprimer</button>
+                </div>
             </div>
         `;
     });
@@ -118,7 +121,8 @@ function afficherCommentairesDansPage(comments, userId) {
                 <div class="comment-card" data-comment-id="${c.id}">
                     <div>
                         <strong>${c.name}</strong> (<span>${c.email}</span>)
-                        <button class="btn btn-supprimer-commentaire" style="float:right; background:#c0392b;">Supprimer</button>
+                        <button class="btn btn-supprimer-commentaire" style="float:right; background:#c0392b; margin-left:6px;">Supprimer</button>
+                        <button class="btn btn-modifier-commentaire" style="float:right; background:#f39c12;">Modifier</button>
                     </div>
                     <div>${c.body}</div>
                 </div>
@@ -184,4 +188,62 @@ $(document).on('submit', '.ajout-commentaire', function(e) {
     $('.comments-list').prepend(html);
     // Reset du formulaire
     form[0].reset();
+});
+
+// Suppression locale d'un commentaire
+$(document).on('click', '.btn-supprimer-commentaire', function() {
+    $(this).closest('.comment-card').remove();
+});
+
+// Suppression locale d'un utilisateur
+$(document).on('click', '.btn-supprimer-user', function() {
+    $(this).closest('.user-card').remove();
+});
+
+// Modification locale d'un commentaire
+$(document).on('click', '.btn-modifier-commentaire', function() {
+    let card = $(this).closest('.comment-card');
+    let currentName = card.find('strong').text();
+    let currentEmail = card.find('span').first().text();
+    let currentBody = card.find('div').last().text();
+
+    // Empêcher plusieurs formulaires en même temps
+    if (card.find('.edit-form').length > 0) return;
+
+    // Affiche un mini-formulaire en ligne
+    let formHtml = `
+        <form class="edit-form" style="margin-top:7px;">
+            <input type="text" name="nom" value="${currentName}" required style="margin-right:6px;width:90px;">
+            <input type="email" name="email" value="${currentEmail}" required style="margin-right:6px;width:120px;">
+            <input type="text" name="contenu" value="${currentBody}" required style="margin-right:6px;width:150px;">
+            <button type="submit" class="btn" style="background:#27ae60;">Valider</button>
+            <button type="button" class="btn btn-annuler-edit" style="background:#7f8c8d;">Annuler</button>
+        </form>
+    `;
+    card.append(formHtml);
+    card.find('.edit-form input[name="nom"]').focus();
+});
+
+// Validation de la modification d'un commentaire
+$(document).on('submit', '.edit-form', function(e) {
+    e.preventDefault();
+    let form = $(this);
+    let card = form.closest('.comment-card');
+    let nom = form.find('input[name="nom"]').val().trim();
+    let email = form.find('input[name="email"]').val().trim();
+    let contenu = form.find('input[name="contenu"]').val().trim();
+    if (!nom || !email || !contenu) {
+        alert('Merci de remplir tous les champs.');
+        return;
+    }
+    // Met à jour l'affichage du commentaire
+    card.find('strong').text(nom);
+    card.find('span').first().text(email);
+    card.find('div').last().text(contenu);
+    form.remove();
+});
+
+// Annulation de l’édition d’un commentaire
+$(document).on('click', '.btn-annuler-edit', function() {
+    $(this).closest('.edit-form').remove();
 });
