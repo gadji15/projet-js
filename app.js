@@ -124,6 +124,13 @@ function afficherCommentairesDansPage(comments, userId) {
     }
 
     html += `   </div>
+                <form class="ajout-commentaire" style="margin-top:20px; border-top:1px solid #eee; padding-top:10px;">
+                    <h4>Ajouter un commentaire</h4>
+                    <input type="text" name="nom" placeholder="Nom" required style="margin-right: 8px;">
+                    <input type="email" name="email" placeholder="Email" required style="margin-right: 8px;">
+                    <input type="text" name="contenu" placeholder="Contenu" required style="width:180px; margin-right: 8px;">
+                    <button class="btn" type="submit">Ajouter</button>
+                </form>
             </div>`;
     $('#comments-section').html(html);
 }
@@ -144,4 +151,34 @@ $(document).on('click', '.btn-save-comments', function() {
     // On stocke avec une clé propre à l'utilisateur
     localStorage.setItem('comments_user_' + userId, JSON.stringify(comments));
     alert('Commentaires sauvegardés pour l\'utilisateur #' + userId);
+});
+
+// Gestion de l'ajout d'un commentaire côté client
+$(document).on('submit', '.ajout-commentaire', function(e) {
+    e.preventDefault();
+    let form = $(this);
+    let nom = form.find('input[name="nom"]').val().trim();
+    let email = form.find('input[name="email"]').val().trim();
+    let contenu = form.find('input[name="contenu"]').val().trim();
+    if (!nom || !email || !contenu) {
+        alert('Merci de remplir tous les champs.');
+        return;
+    }
+    // Créer un commentaire "fictif" avec un id unique basé sur la date
+    let newComment = {
+        id: 'local_' + Date.now(),
+        name: nom,
+        email: email,
+        body: contenu
+    };
+    // Générer le HTML du commentaire et l'ajouter en haut
+    let html = `
+        <div class="comment-card" data-comment-id="${newComment.id}">
+            <div><strong>${newComment.name}</strong> (<span>${newComment.email}</span>)</div>
+            <div>${newComment.body}</div>
+        </div>
+    `;
+    $('.comments-list').prepend(html);
+    // Reset du formulaire
+    form[0].reset();
 });
