@@ -5,6 +5,17 @@
 $(document).ready(function() {
     // Affichage initial
     afficherUtilisateurs();
+
+    // Gestion du clic sur "Voir les commentaires"
+    $('#users-list').on('click', '.btn-comments', function() {
+        let userId = $(this).data('id');
+        afficherCommentaires(userId);
+    });
+
+    // Gestion du clic sur "Masquer les commentaires"
+    $('#comments-section').on('click', '.btn-hide-comments', function() {
+        $('#comments-section').empty();
+    });
 });
 
 // Fonction qui va charger et afficher les utilisateurs
@@ -54,4 +65,65 @@ function afficherUsersDansPage(users) {
     });
     html += '</div>';
     $('#users-list').html(html);
+}
+
+// Fonction pour afficher les commentaires d'un utilisateur
+function afficherCommentaires(userId) {
+    $('#comments-section').html('<em>Chargement des commentaires...</em>');
+
+    // On doit d'abord récupérer les posts de l'utilisateur
+    $.ajax({
+        url: `https://jsonplaceholder.typicode.com/posts?userId=${userId}`,
+        method: 'GET',
+        success: function(posts) {
+            if (!posts || posts.length === 0) {
+                $('#comments-section').html('<em>Aucun commentaire trouvé pour cet utilisateur.</em>');
+                return;
+            }
+            // Récupérer tous les commentaires associés à ces posts
+            let postIds = posts.map(post => post.id);
+            // Pour optimiser, on récupère tous les commentaires et on filtre
+            $.ajax({
+                url: `https://jsonplaceholder.typicode.com/comments`,
+                method: 'GET',
+                success: function(comments) {
+                    // On ne prend que ceux liés à nos posts
+                    let userComments = comments.filter(c => postIds.includes(c.postId));
+                    afficherCommentairesDansPage(userComments, userId);
+                },
+                error: function() {
+                    $('#comments-section').html("<span style='color:red;'>Erreur lors du chargement des commentaires.</span>");
+                }
+            });
+        },
+        error: function() {
+            $('#comments-section').html("<span style='color:red;'>Erreur lors du chargement des posts.</span>");
+        }
+    });
+}
+
+// Affiche les commentaires dans la page
+function afficherCommentairesDansPage(comments, userId) {
+    let html = `<div class="comments-bloc">
+                    <h3>Commentaires de l'utilisateur #${userId}</h3>
+                    <button class="btn btn-hide-comments">Masquer les commentaires</button>
+                    <button class="btn btn-save-comments" data-user="${userId}">Sauvegarder les commentaires</button>
+                    <div class="comments-list">`;
+
+    if (!comments || comments.length === 0) {
+        html += "<em>Aucun commentaire pour cet utilisateur.</em>";
+    } else {
+        comments.forEach(function(c) {
+            html += `
+                <div class="comment-card" data-comment-id="${c.id}">
+                    <div><strong>${c.name}</strong> (<span>${c.email}</span>)</div>
+                    <div>${c.body}</div>
+                </div>
+            `;
+        });
+    }
+
+    html += `   </div>
+            </div>`;
+    $('#comments-section').html(html);
 }
