@@ -116,7 +116,10 @@ function afficherCommentairesDansPage(comments, userId) {
         comments.forEach(function(c) {
             html += `
                 <div class="comment-card" data-comment-id="${c.id}">
-                    <div><strong>${c.name}</strong> (<span>${c.email}</span>)</div>
+                    <div>
+                        <strong>${c.name}</strong> (<span>${c.email}</span>)
+                        <button class="btn btn-supprimer-commentaire" style="float:right; background:#c0392b;">Supprimer</button>
+                    </div>
                     <div>${c.body}</div>
                 </div>
             `;
@@ -181,4 +184,10 @@ $(document).on('submit', '.ajout-commentaire', function(e) {
     $('.comments-list').prepend(html);
     // Reset du formulaire
     form[0].reset();
+});
+
+// Suppression locale d'un commentaire
+$(document).on('click', '.btn-supprimer-commentaire', function() {
+    // Supprime uniquement du DOM côté client
+    $(this).closest('.comment-card').remove();
 });
