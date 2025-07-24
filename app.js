@@ -185,9 +185,3 @@ $(document).on('submit', '.ajout-commentaire', function(e) {
     // Reset du formulaire
     form[0].reset();
 });
-
-// Suppression locale d'un commentaire
-$(document).on('click', '.btn-supprimer-commentaire', function() {
-    // Supprime uniquement du DOM côté client
-    $(this).closest('.comment-card').remove();
-});
