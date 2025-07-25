@@ -1,0 +1,104 @@
+/* Projet JS 2025 - Gadji Cheikh Gaye */
+/* Style simple pour l'application */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+main {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.user-card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.user-info {
+    flex-grow: 1;
+}
+
+.comments-bloc {
+    margin-top: 30px;
+    border-top: 2px solid #eee;
+    padding-top: 20px;
+}
+
+.comment-card {
+    background: #f9f9f9;
+    border-left: 3px solid #3498db;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.btn {
+    padding: 6px 12px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #2980b9;
+}
+
+.btn-delete-user, .btn-delete-comment {
+    background: #e74c3c;
+}
+
+.btn-delete-user:hover, .btn-delete-comment:hover {
+    background: #c0392b;
+}
+
+.add-comment-form, .edit-form {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 4px;
+}
+
+input, textarea {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+.error {
+    color: red;
+    font-weight: bold;
+}
+
+@media (max-width: 600px) {
+    .user-card {
+        flex-direction: column;
+    }
+    
+    .user-actions {
+        margin-top: 10px;
+    }
+}
