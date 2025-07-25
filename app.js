@@ -1,5 +1,9 @@
 // Projet JS 2025
-// Auteur : [Votre Prénom Nom]
+// Auteur : Gadji Cheikh Gaye - 1820382 - UADB
+// Né le 15/03/2004 à Saly
+
+// Toute la logique JS de l'application est ici.
+// Quelques commentaires pour guider la lecture.
 
 // Initialisation principale au chargement de la page
 $(document).ready(function() {

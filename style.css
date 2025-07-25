@@ -1,5 +1,7 @@
-/* Projet JS 2025 - Style de base */
-/* Auteur : [Votre Prénom Nom] */
+/* Projet JS 2025
+   Gadji Cheikh Gaye - UADB
+   Un style sobre, quelques touches de couleur pour les boutons/balises importantes.
+*/
 
 body {
     margin: 0;
@@ -60,6 +62,42 @@ main {
 .btn:hover {
     background: #3660a0;
 }
+.btn-supprimer-commentaire, .btn-supprimer-user {
+    background: #c0392b !important;
+}
+.btn-supprimer-commentaire:hover, .btn-supprimer-user:hover {
+    background: #a93226 !important;
+}
+.btn-modifier-commentaire {
+    background: #f39c12 !important;
+}
+.btn-modifier-commentaire:hover {
+    background: #e67e22 !important;
+}
+
+.comments-bloc {
+    margin-top: 2em;
+    background: #f4f8fc;
+    border-radius: 5px;
+    padding: 17px;
+    box-shadow: 0 2px 8px rgba(35,44,61,0.06);
+}
+
+.comment-card {
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(35,44,61,0.05);
+    margin-bottom: 10px;
+    padding: 8px 10px 5px 10px;
+}
+
+.ajout-commentaire input[type="text"],
+.ajout-commentaire input[type="email"] {
+    border: 1px solid #bbb;
+    border-radius: 3px;
+    padding: 4px 7px;
+    margin-bottom: 5px;
+}
 
 @media (max-width: 600px) {
     main {
@@ -70,7 +108,10 @@ main {
         align-items: stretch;
     }
     .btn {
-        margin-top: 5px;
+        margin-top: 7px;
         margin-left: 0;
+    }
+    .comments-bloc {
+        padding: 7px;
     }
 }
