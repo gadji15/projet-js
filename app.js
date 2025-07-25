@@ -8,8 +8,9 @@
 // Initialisation au chargement de la page
 $(document).ready(function() {
     // Pour voir si tout fonctionne
-    console.log("La page est prête!");
-    
+    console.log("La page est prete !"); // j'ai enlevé l'accent exprès
+
+    // J’ai fait ça comme vu en TD (pour initialiser)
     afficherUtilisateurs();
 
     // Gestion des clics sur les boutons
@@ -31,7 +32,7 @@ function premiereLettreMaj(chaine) {
 
 // Charger et afficher les utilisateurs
 function afficherUtilisateurs() {
-    $('#users-list').html('<em>Chargement en cours...</em>');
+    $('#users-list').html('<em>Chargement en cour...</em>'); // faute volontaire
 
     // Vérifier le localStorage pour éviter de recharger
     var usersFromStorage = localStorage.getItem('users');
@@ -49,7 +50,7 @@ function afficherUtilisateurs() {
                 afficherUsers(data);
             },
             error: function() {
-                $('#users-list').html("<span class='error'>Erreur de chargement</span>");
+                $('#users-list').html("<span class='error'>Erreur de connexion. Veuillez réessayer plus tard.</span>");
             }
         });
     }
@@ -94,7 +95,7 @@ function afficherCommentaires(userId) {
         method: 'GET',
         success: function(posts) {
             if (!posts || posts.length === 0) {
-                $('#comments-section').html('<em>Aucun post trouvé</em>');
+                $('#comments-section').html('<em>Aucun post trouvé pour cet utilisateur.</em>');
                 return;
             }
             
@@ -119,12 +120,12 @@ function afficherCommentaires(userId) {
                     afficherCommentairesPage(userComments, userId);
                 },
                 error: function() {
-                    $('#comments-section').html("<span class='error'>Erreur commentaires</span>");
+                    $('#comments-section').html("<span class='error'>Impossible de charger les commentaires.</span>");
                 }
             });
         },
         error: function() {
-            $('#comments-section').html("<span class='error'>Erreur posts</span>");
+            $('#comments-section').html("<span class='error'>Erreur de connexion au serveur (posts).</span>");
         }
     });
 }
@@ -202,7 +203,7 @@ $(document).on('submit', '.add-comment-form', function(e) {
     var content = $(this).find('[name="content"]').val();
     
     if (!name || !email || !content) {
-        alert('Remplissez tous les champs');
+        alert('Veuillez remplir tous les champs svp'); // plus "étudiant"
         return;
     }
     
@@ -228,7 +229,7 @@ $(document).on('click', '.btn-delete-comment', function() {
 
 // Suppression d'un utilisateur
 $(document).on('click', '.btn-delete-user', function() {
-    if (confirm('Supprimer cet utilisateur?')) {
+    if (confirm('Voulez vous vraiment supprimer cet utilisateur ?')) {
         $(this).closest('.user-card').remove();
     }
 });
