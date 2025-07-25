@@ -229,7 +229,7 @@ $(document).on('click', '.btn-delete-comment', function() {
 
 // Suppression d'un utilisateur
 $(document).on('click', '.btn-delete-user', function() {
-    if (confirm('Voulez vous vraiment supprimer cet utilisateur ?')) {
+    if (confirm('Supprimer cet utilisateur?')) {
         $(this).closest('.user-card').remove();
     }
 });
