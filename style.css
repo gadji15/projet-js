@@ -1,117 +1,104 @@
-/* Projet JS 2025
-   Gadji Cheikh Gaye - UADB
-   Un style sobre, quelques touches de couleur pour les boutons/balises importantes.
-*/
+/* Projet JS 2025 - Gadji Cheikh Gaye */
+/* Style simple pour l'application */
 
 body {
+    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
-    background: #f7f7f7;
-    color: #222;
+    background-color: #f0f0f0;
+    color: #333;
 }
 
-header, footer {
-    background: #232c3d;
-    color: #fff;
+header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 20px;
     text-align: center;
-    padding: 1em 0;
-}
-
-h1 {
-    margin: 0.2em 0 0.1em 0;
-    font-size: 2em;
-    letter-spacing: 1px;
 }
 
 main {
-    max-width: 900px;
-    margin: 30px auto 0 auto;
-    background: #fff;
-    border-radius: 7px;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.07);
-    padding: 24px 16px 36px 16px;
-    min-height: 450px;
-}
-
-#users-list {
-    margin-top: 1.5em;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .user-card {
-    border-bottom: 1px solid #e2e2e2;
-    padding: 12px 0;
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
 }
+
 .user-info {
-    flex: 1;
-}
-.btn {
-    background: #253b5c;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: 6px 15px;
-    font-size: 1em;
-    cursor: pointer;
-    margin-left: 8px;
-    transition: background 0.2s;
-}
-.btn:hover {
-    background: #3660a0;
-}
-.btn-supprimer-commentaire, .btn-supprimer-user {
-    background: #c0392b !important;
-}
-.btn-supprimer-commentaire:hover, .btn-supprimer-user:hover {
-    background: #a93226 !important;
-}
-.btn-modifier-commentaire {
-    background: #f39c12 !important;
-}
-.btn-modifier-commentaire:hover {
-    background: #e67e22 !important;
+    flex-grow: 1;
 }
 
 .comments-bloc {
-    margin-top: 2em;
-    background: #f4f8fc;
-    border-radius: 5px;
-    padding: 17px;
-    box-shadow: 0 2px 8px rgba(35,44,61,0.06);
+    margin-top: 30px;
+    border-top: 2px solid #eee;
+    padding-top: 20px;
 }
 
 .comment-card {
-    background: #fff;
-    border-radius: 4px;
-    box-shadow: 0 1px 4px rgba(35,44,61,0.05);
+    background: #f9f9f9;
+    border-left: 3px solid #3498db;
+    padding: 10px;
     margin-bottom: 10px;
-    padding: 8px 10px 5px 10px;
 }
 
-.ajout-commentaire input[type="text"],
-.ajout-commentaire input[type="email"] {
-    border: 1px solid #bbb;
+.btn {
+    padding: 6px 12px;
+    background: #3498db;
+    color: white;
+    border: none;
     border-radius: 3px;
-    padding: 4px 7px;
-    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #2980b9;
+}
+
+.btn-delete-user, .btn-delete-comment {
+    background: #e74c3c;
+}
+
+.btn-delete-user:hover, .btn-delete-comment:hover {
+    background: #c0392b;
+}
+
+.add-comment-form, .edit-form {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 4px;
+}
+
+input, textarea {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+.error {
+    color: red;
+    font-weight: bold;
 }
 
 @media (max-width: 600px) {
-    main {
-        padding: 10px 2px;
-    }
     .user-card {
         flex-direction: column;
-        align-items: stretch;
     }
-    .btn {
-        margin-top: 7px;
-        margin-left: 0;
-    }
-    .comments-bloc {
-        padding: 7px;
+    
+    .user-actions {
+        margin-top: 10px;
     }
 }

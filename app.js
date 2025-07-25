@@ -3,251 +3,271 @@
 // Né le 15/03/2004 à Saly
 
 // Toute la logique JS de l'application est ici.
-// Quelques commentaires pour guider la lecture.
+// J'ai essayé de faire au mieux avec ce que j'ai appris en cours.
 
-// Initialisation principale au chargement de la page
+// Initialisation au chargement de la page
 $(document).ready(function() {
-    // Affichage initial
+    // Pour voir si tout fonctionne
+    console.log("La page est prête!");
+    
     afficherUtilisateurs();
 
-    // Gestion du clic sur "Voir les commentaires"
+    // Gestion des clics sur les boutons
     $('#users-list').on('click', '.btn-comments', function() {
-        let userId = $(this).data('id');
+        var userId = $(this).data('id');
         afficherCommentaires(userId);
     });
 
-    // Gestion du clic sur "Masquer les commentaires"
     $('#comments-section').on('click', '.btn-hide-comments', function() {
         $('#comments-section').empty();
     });
 });
 
-// Fonction qui va charger et afficher les utilisateurs
-function afficherUtilisateurs() {
-    $('#users-list').html('<em>Chargement des utilisateurs...</em>');
+// Fonction pour mettre une majuscule (apprise en cours)
+function premiereLettreMaj(chaine) {
+    if (!chaine) return '';
+    return chaine.charAt(0).toUpperCase() + chaine.slice(1);
+}
 
-    // Vérifier si les users sont déjà en localStorage (évite requête inutile)
-    let users = localStorage.getItem('users');
-    if (users) {
-        users = JSON.parse(users);
-        afficherUsersDansPage(users);
+// Charger et afficher les utilisateurs
+function afficherUtilisateurs() {
+    $('#users-list').html('<em>Chargement en cours...</em>');
+
+    // Vérifier le localStorage pour éviter de recharger
+    var usersFromStorage = localStorage.getItem('users');
+    if (usersFromStorage) {
+        var users = JSON.parse(usersFromStorage);
+        afficherUsers(users);
     } else {
-        // Sinon, récupération AJAX
+        // Requête AJAX pour les utilisateurs
         $.ajax({
             url: 'https://jsonplaceholder.typicode.com/users',
             method: 'GET',
             success: function(data) {
-                // Sauvegarde en localStorage
+                // Sauvegarde dans le stockage local
                 localStorage.setItem('users', JSON.stringify(data));
-                afficherUsersDansPage(data);
+                afficherUsers(data);
             },
             error: function() {
-                $('#users-list').html("<span style='color:red;'>Erreur lors du chargement des utilisateurs.</span>");
+                $('#users-list').html("<span class='error'>Erreur de chargement</span>");
             }
         });
     }
 }
 
-// Affichage des utilisateurs dans la page
-function afficherUsersDansPage(users) {
+// Afficher les utilisateurs dans la page
+function afficherUsers(users) {
     if (!users || users.length === 0) {
-        $('#users-list').html("<em>Aucun utilisateur trouvé.</em>");
+        $('#users-list').html("<em>Aucun utilisateur trouvé</em>");
         return;
     }
-    let html = '<div>';
-    users.forEach(function(user, idx) {
-        html += `
-            <div class="user-card" data-user-id="${user.id}">
-                <div class="user-info">
-                    <strong>${user.name}</strong><br>
-                    <span>${user.email}</span> | 
-                    <span>${user.address.city}</span>
-                </div>
-                <div>
-                    <button class="btn btn-comments" data-id="${user.id}">Voir les commentaires</button>
-                    <button class="btn btn-supprimer-user" style="background:#c0392b; margin-left:8px;">Supprimer</button>
-                </div>
-            </div>
-        `;
-    });
-    html += '</div>';
+    
+    var html = '';
+    for (var i = 0; i < users.length; i++) {
+        var user = users[i];
+        // J'utilise la fonction pour la majuscule
+        var nomMaj = premiereLettreMaj(user.name.split(' ')[0]);
+        
+        html += '<div class="user-card" data-user-id="' + user.id + '">';
+        html += '  <div class="user-info">';
+        html += '    <strong>' + nomMaj + '</strong><br>';
+        html += '    <span>' + user.email + '</span> | ';
+        html += '    <span>' + user.address.city + '</span>';
+        html += '  </div>';
+        html += '  <div class="user-actions">';
+        html += '    <button class="btn btn-comments" data-id="' + user.id + '">Voir commentaires</button>';
+        html += '    <button class="btn btn-delete-user">Supprimer</button>';
+        html += '  </div>';
+        html += '</div>';
+    }
+    
     $('#users-list').html(html);
 }
 
-// Fonction pour afficher les commentaires d'un utilisateur
+// Afficher les commentaires d'un utilisateur
 function afficherCommentaires(userId) {
     $('#comments-section').html('<em>Chargement des commentaires...</em>');
 
-    // On doit d'abord récupérer les posts de l'utilisateur
+    // D'abord récupérer les posts de l'utilisateur
     $.ajax({
-        url: `https://jsonplaceholder.typicode.com/posts?userId=${userId}`,
+        url: 'https://jsonplaceholder.typicode.com/posts?userId=' + userId,
         method: 'GET',
         success: function(posts) {
             if (!posts || posts.length === 0) {
-                $('#comments-section').html('<em>Aucun commentaire trouvé pour cet utilisateur.</em>');
+                $('#comments-section').html('<em>Aucun post trouvé</em>');
                 return;
             }
-            // Récupérer tous les commentaires associés à ces posts
-            let postIds = posts.map(post => post.id);
-            // Pour optimiser, on récupère tous les commentaires et on filtre
+            
+            // Récupérer les IDs des posts
+            var postIds = [];
+            for (var j = 0; j < posts.length; j++) {
+                postIds.push(posts[j].id);
+            }
+            
+            // Récupérer tous les commentaires (méthode simple)
             $.ajax({
-                url: `https://jsonplaceholder.typicode.com/comments`,
+                url: 'https://jsonplaceholder.typicode.com/comments',
                 method: 'GET',
                 success: function(comments) {
-                    // On ne prend que ceux liés à nos posts
-                    let userComments = comments.filter(c => postIds.includes(c.postId));
-                    afficherCommentairesDansPage(userComments, userId);
+                    // Filtrer les commentaires
+                    var userComments = [];
+                    for (var k = 0; k < comments.length; k++) {
+                        if (postIds.includes(comments[k].postId)) {
+                            userComments.push(comments[k]);
+                        }
+                    }
+                    afficherCommentairesPage(userComments, userId);
                 },
                 error: function() {
-                    $('#comments-section').html("<span style='color:red;'>Erreur lors du chargement des commentaires.</span>");
+                    $('#comments-section').html("<span class='error'>Erreur commentaires</span>");
                 }
             });
         },
         error: function() {
-            $('#comments-section').html("<span style='color:red;'>Erreur lors du chargement des posts.</span>");
+            $('#comments-section').html("<span class='error'>Erreur posts</span>");
         }
     });
 }
 
-// Affiche les commentaires dans la page
-function afficherCommentairesDansPage(comments, userId) {
-    let html = `<div class="comments-bloc">
-                    <h3>Commentaires de l'utilisateur #${userId}</h3>
-                    <button class="btn btn-hide-comments">Masquer les commentaires</button>
-                    <button class="btn btn-save-comments" data-user="${userId}">Sauvegarder les commentaires</button>
-                    <div class="comments-list">`;
+// Afficher les commentaires dans la page
+function afficherCommentairesPage(comments, userId) {
+    var html = '<div class="comments-bloc">';
+    html += '<h3>Commentaires #' + userId + '</h3>';
+    html += '<button class="btn btn-hide-comments">Masquer</button>';
+    html += '<button class="btn btn-save-comments" data-user="' + userId + '">Sauvegarder</button>';
+    html += '<div class="comments-list">';
 
     if (!comments || comments.length === 0) {
-        html += "<em>Aucun commentaire pour cet utilisateur.</em>";
+        html += '<em>Aucun commentaire</em>';
     } else {
-        comments.forEach(function(c) {
-            html += `
-                <div class="comment-card" data-comment-id="${c.id}">
-                    <div>
-                        <strong>${c.name}</strong> (<span>${c.email}</span>)
-                        <button class="btn btn-supprimer-commentaire" style="float:right; background:#c0392b; margin-left:6px;">Supprimer</button>
-                        <button class="btn btn-modifier-commentaire" style="float:right; background:#f39c12;">Modifier</button>
-                    </div>
-                    <div>${c.body}</div>
-                </div>
-            `;
-        });
+        for (var i = 0; i < comments.length; i++) {
+            var c = comments[i];
+            html += '<div class="comment-card" data-comment-id="' + c.id + '">';
+            html += '  <div>';
+            html += '    <strong>' + c.name + '</strong>';
+            html += '    (<span>' + c.email + '</span>)';
+            html += '    <button class="btn btn-delete-comment">Supprimer</button>';
+            html += '    <button class="btn btn-edit-comment">Modifier</button>';
+            html += '  </div>';
+            html += '  <div>' + c.body + '</div>';
+            html += '</div>';
+        }
     }
 
-    html += `   </div>
-                <form class="ajout-commentaire" style="margin-top:20px; border-top:1px solid #eee; padding-top:10px;">
-                    <h4>Ajouter un commentaire</h4>
-                    <input type="text" name="nom" placeholder="Nom" required style="margin-right: 8px;">
-                    <input type="email" name="email" placeholder="Email" required style="margin-right: 8px;">
-                    <input type="text" name="contenu" placeholder="Contenu" required style="width:180px; margin-right: 8px;">
-                    <button class="btn" type="submit">Ajouter</button>
-                </form>
-            </div>`;
+    html += '</div>'; // .comments-list
+    
+    // Formulaire d'ajout
+    html += '<form class="add-comment-form">';
+    html += '  <h4>Ajouter un commentaire</h4>';
+    html += '  <input type="text" name="name" placeholder="Nom" required>';
+    html += '  <input type="email" name="email" placeholder="Email" required>';
+    html += '  <textarea name="content" placeholder="Contenu" required></textarea>';
+    html += '  <button type="submit" class="btn">Ajouter</button>';
+    html += '</form>';
+    
+    html += '</div>'; // .comments-bloc
+    
     $('#comments-section').html(html);
 }
 
-// Sauvegarde des commentaires affichés dans le localStorage
+// Sauvegarde des commentaires
 $(document).on('click', '.btn-save-comments', function() {
-    let userId = $(this).data('user');
-    let comments = [];
-    // On récupère tous les commentaires actuellement affichés
+    var userId = $(this).data('user');
+    var comments = [];
+    
     $('.comment-card').each(function() {
+        var commentId = $(this).data('comment-id');
+        var name = $(this).find('strong').text();
+        var email = $(this).find('span').text();
+        var content = $(this).find('div').last().text();
+        
         comments.push({
-            id: $(this).data('comment-id'),
-            name: $(this).find('strong').text(),
-            email: $(this).find('span').first().text(),
-            body: $(this).find('div').last().text()
+            id: commentId,
+            name: name,
+            email: email,
+            body: content
         });
     });
-    // On stocke avec une clé propre à l'utilisateur
+    
     localStorage.setItem('comments_user_' + userId, JSON.stringify(comments));
-    alert('Commentaires sauvegardés pour l\'utilisateur #' + userId);
+    alert('Sauvegardé!');
 });
 
-// Gestion de l'ajout d'un commentaire côté client
-$(document).on('submit', '.ajout-commentaire', function(e) {
+// Ajout d'un nouveau commentaire
+$(document).on('submit', '.add-comment-form', function(e) {
     e.preventDefault();
-    let form = $(this);
-    let nom = form.find('input[name="nom"]').val().trim();
-    let email = form.find('input[name="email"]').val().trim();
-    let contenu = form.find('input[name="contenu"]').val().trim();
-    if (!nom || !email || !contenu) {
-        alert('Merci de remplir tous les champs.');
+    
+    var name = $(this).find('[name="name"]').val();
+    var email = $(this).find('[name="email"]').val();
+    var content = $(this).find('[name="content"]').val();
+    
+    if (!name || !email || !content) {
+        alert('Remplissez tous les champs');
         return;
     }
-    // Créer un commentaire "fictif" avec un id unique basé sur la date
-    let newComment = {
-        id: 'local_' + Date.now(),
-        name: nom,
-        email: email,
-        body: contenu
-    };
-    // Générer le HTML du commentaire et l'ajouter en haut
-    let html = `
-        <div class="comment-card" data-comment-id="${newComment.id}">
-            <div><strong>${newComment.name}</strong> (<span>${newComment.email}</span>)</div>
-            <div>${newComment.body}</div>
-        </div>
-    `;
-    $('.comments-list').prepend(html);
-    // Reset du formulaire
-    form[0].reset();
+    
+    // Création d'un ID simple
+    var newId = 'local_' + new Date().getTime();
+    
+    var newCommentHtml = '<div class="comment-card" data-comment-id="' + newId + '">';
+    newCommentHtml += '<div><strong>' + name + '</strong>';
+    newCommentHtml += '(<span>' + email + '</span>)';
+    newCommentHtml += '<button class="btn btn-delete-comment">Supprimer</button>';
+    newCommentHtml += '<button class="btn btn-edit-comment">Modifier</button></div>';
+    newCommentHtml += '<div>' + content + '</div>';
+    newCommentHtml += '</div>';
+    
+    $('.comments-list').prepend(newCommentHtml);
+    $(this)[0].reset();
 });
 
-// Suppression locale d'un commentaire
-$(document).on('click', '.btn-supprimer-commentaire', function() {
+// Suppression d'un commentaire
+$(document).on('click', '.btn-delete-comment', function() {
     $(this).closest('.comment-card').remove();
 });
 
-// Suppression locale d'un utilisateur
-$(document).on('click', '.btn-supprimer-user', function() {
-    $(this).closest('.user-card').remove();
+// Suppression d'un utilisateur
+$(document).on('click', '.btn-delete-user', function() {
+    if (confirm('Supprimer cet utilisateur?')) {
+        $(this).closest('.user-card').remove();
+    }
 });
 
-// Modification locale d'un commentaire
-$(document).on('click', '.btn-modifier-commentaire', function() {
-    let card = $(this).closest('.comment-card');
-    let currentName = card.find('strong').text();
-    let currentEmail = card.find('span').first().text();
-    let currentBody = card.find('div').last().text();
-
-    // Empêcher plusieurs formulaires en même temps
-    if (card.find('.edit-form').length > 0) return;
-
-    // Affiche un mini-formulaire en ligne
-    let formHtml = `
-        <form class="edit-form" style="margin-top:7px;">
-            <input type="text" name="nom" value="${currentName}" required style="margin-right:6px;width:90px;">
-            <input type="email" name="email" value="${currentEmail}" required style="margin-right:6px;width:120px;">
-            <input type="text" name="contenu" value="${currentBody}" required style="margin-right:6px;width:150px;">
-            <button type="submit" class="btn" style="background:#27ae60;">Valider</button>
-            <button type="button" class="btn btn-annuler-edit" style="background:#7f8c8d;">Annuler</button>
-        </form>
-    `;
+// Édition d'un commentaire
+$(document).on('click', '.btn-edit-comment', function() {
+    var card = $(this).closest('.comment-card');
+    var name = card.find('strong').text();
+    var email = card.find('span').text();
+    var content = card.find('div').last().text();
+    
+    var formHtml = '<form class="edit-form">';
+    formHtml += '<input type="text" name="edit-name" value="' + name + '">';
+    formHtml += '<input type="email" name="edit-email" value="' + email + '">';
+    formHtml += '<textarea name="edit-content">' + content + '</textarea>';
+    formHtml += '<button type="submit" class="btn">Valider</button>';
+    formHtml += '<button type="button" class="btn cancel-edit">Annuler</button>';
+    formHtml += '</form>';
+    
     card.append(formHtml);
-    card.find('.edit-form input[name="nom"]').focus();
 });
 
-// Validation de la modification d'un commentaire
+// Validation de l'édition
 $(document).on('submit', '.edit-form', function(e) {
     e.preventDefault();
-    let form = $(this);
-    let card = form.closest('.comment-card');
-    let nom = form.find('input[name="nom"]').val().trim();
-    let email = form.find('input[name="email"]').val().trim();
-    let contenu = form.find('input[name="contenu"]').val().trim();
-    if (!nom || !email || !contenu) {
-        alert('Merci de remplir tous les champs.');
-        return;
-    }
-    // Met à jour l'affichage du commentaire
-    card.find('strong').text(nom);
-    card.find('span').first().text(email);
-    card.find('div').last().text(contenu);
-    form.remove();
+    
+    var card = $(this).closest('.comment-card');
+    var name = $(this).find('[name="edit-name"]').val();
+    var email = $(this).find('[name="edit-email"]').val();
+    var content = $(this).find('[name="edit-content"]').val();
+    
+    card.find('strong').text(name);
+    card.find('span').text(email);
+    card.find('div').last().text(content);
+    
+    $(this).remove();
 });
 
-// Annulation de l’édition d’un commentaire
-$(document).on('click', '.btn-annuler-edit', function() {
+// Annulation de l'édition
+$(document).on('click', '.cancel-edit', function() {
     $(this).closest('.edit-form').remove();
 });
