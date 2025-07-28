@@ -8,9 +8,9 @@
 // Initialisation au chargement de la page
 $(document).ready(function() {
     // Pour voir si tout fonctionne
-    console.log("La page est prete !"); // j'ai enlevé l'accent exprès
+    console.log("La page est prete !"); 
 
-    // J’ai fait ça comme vu en TD (pour initialiser)
+    
     afficherUtilisateurs();
 
     // Gestion des clics sur les boutons
@@ -24,7 +24,7 @@ $(document).ready(function() {
     });
 });
 
-// Fonction pour mettre une majuscule (apprise en cours)
+// Fonction pour mettre une majuscule (apprise sur youtube)
 function premiereLettreMaj(chaine) {
     if (!chaine) return '';
     return chaine.charAt(0).toUpperCase() + chaine.slice(1);
