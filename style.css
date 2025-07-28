@@ -60,6 +60,22 @@ main {
     cursor: pointer;
 }
 
+.btn-save {
+    background: #27ae60;
+}
+.btn-save:hover {
+    background: #219150;
+}
+
+.btn-hide {
+    background: #f39c12;
+    color: #fff;
+}
+.btn-hide:hover {
+    background: #e67e22;
+    color: #fff;
+}
+
 .btn:hover {
     background: #2980b9;
 }

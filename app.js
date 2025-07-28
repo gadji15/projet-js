@@ -142,8 +142,8 @@ function afficherCommentaires(userId) {
 function afficherCommentairesPageSousCarte(comments, userId, userCard) {
     var html = '';
     html += '<h3>Commentaires #' + userId + '</h3>';
-    html += '<button class="btn btn-hide-comments">Masquer</button>';
-    html += '<button class="btn btn-save-comments" data-user="' + userId + '">Sauvegarder</button>';
+    html += '<button class="btn btn-hide-comments btn-hide">Masquer</button>';
+    html += '<button class="btn btn-save-comments btn-save" data-user="' + userId + '">Sauvegarder</button>';
     html += '<div class="comments-list">';
 
     if (!comments || comments.length === 0) {
