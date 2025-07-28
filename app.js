@@ -1,11 +1,12 @@
 // Projet JS 2025
-// Auteur : Gadji Cheikh Gaye - 1820382 - UADB
-// Né le 15/03/2004 à Saly
+// Nom, Prénom : Gadji Cheikh Gaye - code permanent: 1820382 - universite: UADB
+// Date et lieu de naissance: le 15/03/2004 à Saly
 
 // Toute la logique JS de l'application est ici.
 // J'ai essayé de faire au mieux avec ce que j'ai appris en cours.
 
 // Initialisation au chargement de la page
+
 $(document).ready(function() {
     // Pour voir si tout fonctionne
     console.log("La page est prete !"); 
