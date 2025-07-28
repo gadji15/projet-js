@@ -19,8 +19,9 @@ $(document).ready(function() {
         afficherCommentaires(userId);
     });
 
-    $('#comments-section').on('click', '.btn-hide-comments', function() {
-        $('#comments-section').empty();
+    // Gestion du clic "Masquer" pour retirer le bloc sous la carte utilisateur
+    $(document).on('click', '.btn-hide-comments', function() {
+        $(this).closest('.comments-bloc').remove();
     });
 });
 
@@ -85,26 +86,33 @@ function afficherUsers(users) {
     $('#users-list').html(html);
 }
 
-// Afficher les commentaires d'un utilisateur
+// Afficher les commentaires d'un utilisateur sous sa carte
 function afficherCommentaires(userId) {
-    $('#comments-section').html('<em>Chargement des commentaires...</em>');
+    // Supprimer tout bloc de commentaires déjà présent
+    $('.comments-bloc').remove();
 
-    // D'abord récupérer les posts de l'utilisateur
+    // Trouver la carte de l'utilisateur sélectionné
+    var userCard = $('.user-card[data-user-id="' + userId + '"]');
+    if (userCard.length === 0) return;
+
+    // Afficher un message de chargement juste sous la carte
+    userCard.after('<div class="comments-bloc"><em>Chargement des commentaires...</em></div>');
+
+    // Récupérer les posts de l'utilisateur
     $.ajax({
         url: 'https://jsonplaceholder.typicode.com/posts?userId=' + userId,
         method: 'GET',
         success: function(posts) {
             if (!posts || posts.length === 0) {
-                $('#comments-section').html('<em>Aucun post trouvé pour cet utilisateur.</em>');
+                userCard.next('.comments-bloc').html('<em>Aucun post trouvé pour cet utilisateur.</em>');
                 return;
             }
-            
-            // Récupérer les IDs des posts
+
             var postIds = [];
             for (var j = 0; j < posts.length; j++) {
                 postIds.push(posts[j].id);
             }
-            
+
             // Récupérer tous les commentaires (méthode simple)
             $.ajax({
                 url: 'https://jsonplaceholder.typicode.com/comments',
@@ -117,22 +125,22 @@ function afficherCommentaires(userId) {
                             userComments.push(comments[k]);
                         }
                     }
-                    afficherCommentairesPage(userComments, userId);
+                    afficherCommentairesPageSousCarte(userComments, userId, userCard);
                 },
                 error: function() {
-                    $('#comments-section').html("<span class='error'>Impossible de charger les commentaires.</span>");
+                    userCard.next('.comments-bloc').html("<span class='error'>Impossible de charger les commentaires.</span>");
                 }
             });
         },
         error: function() {
-            $('#comments-section').html("<span class='error'>Erreur de connexion au serveur (posts).</span>");
+            userCard.next('.comments-bloc').html("<span class='error'>Erreur de connexion au serveur (posts).</span>");
         }
     });
 }
 
 // Afficher les commentaires dans la page
-function afficherCommentairesPage(comments, userId) {
-    var html = '<div class="comments-bloc">';
+function afficherCommentairesPageSousCarte(comments, userId, userCard) {
+    var html = '';
     html += '<h3>Commentaires #' + userId + '</h3>';
     html += '<button class="btn btn-hide-comments">Masquer</button>';
     html += '<button class="btn btn-save-comments" data-user="' + userId + '">Sauvegarder</button>';
@@ -156,7 +164,7 @@ function afficherCommentairesPage(comments, userId) {
     }
 
     html += '</div>'; // .comments-list
-    
+
     // Formulaire d'ajout
     html += '<form class="add-comment-form">';
     html += '  <h4>Ajouter un commentaire</h4>';
@@ -165,10 +173,8 @@ function afficherCommentairesPage(comments, userId) {
     html += '  <textarea name="content" placeholder="Contenu" required></textarea>';
     html += '  <button type="submit" class="btn">Ajouter</button>';
     html += '</form>';
-    
-    html += '</div>'; // .comments-bloc
-    
-    $('#comments-section').html(html);
+
+    userCard.next('.comments-bloc').html(html);
 }
 
 // Sauvegarde des commentaires
