@@ -356,11 +356,35 @@ $(document).on('click', '.btn-delete-comment', async function() {
     }
 });
 
-// Suppression d'un utilisateur (à migrer prochainement en DELETE Supabase)
-$(document).on('click', '.btn-delete-user', function() {
-    if (confirm('Supprimer cet utilisateur?')) {
-        $(this).closest('.user-card').remove();
-        showToast("Utilisateur supprimé.", "info");
+// Suppression d'un utilisateur (DELETE réel Supabase si id numérique)
+$(document).on('click', '.btn-delete-user', async function() {
+    var $card = $(this).closest('.user-card');
+    var userId = $card.data('user-id');
+    if (!userId) return;
+
+    if (confirm('Supprimer cet utilisateur ?')) {
+        if (!isNaN(Number(userId))) {
+            try {
+                showLoader();
+                const { error } = await supabase.from('users').delete().eq('id', userId);
+                hideLoader();
+                if (error) {
+                    showToast("Erreur Supabase: " + error.message, "error");
+                    $card.remove(); // fallback local même si erreur
+                } else {
+                    showToast("Utilisateur supprimé (Supabase).", "success");
+                    afficherUtilisateurs();
+                }
+            } catch (e) {
+                hideLoader();
+                showToast("Erreur réseau/Supabase.", "error");
+                $card.remove();
+            }
+        } else {
+            // Suppression locale (compatibilité)
+            $card.remove();
+            showToast("Utilisateur supprimé (local).", "info");
+        }
     }
 });
 
