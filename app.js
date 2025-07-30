@@ -50,6 +50,37 @@ function premiereLettreMaj(chaine) {
     return chaine.charAt(0).toUpperCase() + chaine.slice(1);
 }
 
+// Ajout d'un utilisateur (INSERT Supabase)
+$(document).on('submit', '#add-user-form', async function(e) {
+    e.preventDefault();
+    var $form = $(this);
+    var name = $form.find('[name="name"]').val();
+    var email = $form.find('[name="email"]').val();
+    var city = $form.find('[name="city"]').val();
+
+    if (!name || !email || !city) {
+        showToast("Veuillez remplir tous les champs", "error");
+        return;
+    }
+    try {
+        showLoader();
+        const { error } = await supabase.from('users').insert([
+            { name: name, email: email, city: city }
+        ]);
+        hideLoader();
+        if (error) {
+            showToast("Erreur Supabase: " + error.message, "error");
+        } else {
+            showToast("Utilisateur ajouté !", "success");
+            afficherUtilisateurs();
+        }
+    } catch (e) {
+        hideLoader();
+        showToast("Erreur réseau/Supabase.", "error");
+    }
+    $form[0].reset();
+});
+
 // Loader global (animation centrale)
 function showLoader() {
     $("#global-loader").fadeIn(100);

@@ -28,6 +28,13 @@
 
         <section>
             <h2>Utilisateurs</h2>
+            <!-- Formulaire d'ajout d'utilisateur -->
+            <form id="add-user-form" style="margin-bottom:20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                <input type="text" name="name" placeholder="Nom" required style="padding:8px 12px;border-radius:4px;border:1.5px solid #b5cde8;font-size:1em;">
+                <input type="email" name="email" placeholder="Email" required style="padding:8px 12px;border-radius:4px;border:1.5px solid #b5cde8;font-size:1em;">
+                <input type="text" name="city" placeholder="Ville" required style="padding:8px 12px;border-radius:4px;border:1.5px solid #b5cde8;font-size:1em;">
+                <button class="btn btn-save" type="submit">Ajouter utilisateur</button>
+            </form>
             <!-- Barre de recherche moderne -->
             <div style="margin-bottom:18px;display:flex;justify-content:flex-end;">
                 <input type="text" id="user-search" placeholder="🔍 Rechercher un utilisateur, email ou ville..." style="padding:10px 16px;border-radius:30px;border:1.5px solid #b5cde8;width:320px;max-width:100%;font-size:1em;box-shadow:0 1px 5px #2221;outline:none;transition:border 0.2s;">
