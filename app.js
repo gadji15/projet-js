@@ -1,9 +1,5 @@
-// Projet JS 2025
-// Auteur : Gadji Cheikh Gaye - 1820382 - UADB
+// Projet JS 2025 - Gadji Cheikh Gaye (1820382) - UADB
 // Né le 15/03/2004 à Saly
-
-// Toute la logique JS de l'application est ici.
-// Design moderne, loader, toast, dark mode, feedback utilisateur.
 
 // --- Initialisation Supabase ---
 const supabaseUrl = 'https://sjsdpshlwrzatknuzwli.supabase.co';
@@ -72,22 +68,46 @@ function showToast(message, type) {
     $toast.text(message).fadeIn(180).delay(1700).fadeOut(700);
 }
 
-// Charger et afficher les utilisateurs
+// Charger et afficher les utilisateurs (Supabase en priorité, fallback JSONPlaceholder)
 async function afficherUtilisateurs() {
     showLoader();
     $('#users-list').html('');
-    // --- Nouvelle version : chargement via Supabase ---
-    const { data, error } = await supabase.from('users').select('*');
-    hideLoader();
-    if (error) {
-        $('#users-list').html("<span class='error'>Erreur de connexion à Supabase.</span>");
-        showToast("Erreur Supabase: " + error.message, "error");
-        return;
+    // --- Essaye de charger via Supabase ---
+    try {
+        const { data, error } = await supabase.from('users').select('*');
+        if (!error && data && data.length) {
+            afficherUsers(data);
+            hideLoader();
+            return;
+        }
+    } catch (e) {
+        // Ignore, fallback sur JSONPlaceholder
     }
-    afficherUsers(data);
+    // Fallback : JSONPlaceholder/localStorage
+    var usersFromStorage = localStorage.getItem('users');
+    if (usersFromStorage) {
+        var users = JSON.parse(usersFromStorage);
+        afficherUsers(users);
+        hideLoader();
+    } else {
+        $.ajax({
+            url: 'https://jsonplaceholder.typicode.com/users',
+            method: 'GET',
+            success: function(data) {
+                localStorage.setItem('users', JSON.stringify(data));
+                afficherUsers(data);
+                hideLoader();
+            },
+            error: function() {
+                $('#users-list').html("<span class='error'>Erreur de connexion. Veuillez réessayer plus tard.</span>");
+                hideLoader();
+                showToast("Erreur lors du chargement des utilisateurs.", "error");
+            }
+        });
+    }
 }
 
-// Afficher les utilisateurs dans la page
+// Afficher les utilisateurs dans la page + recherche
 let allUsers = []; // Pour le filtrage global
 
 function afficherUsers(users) {
@@ -96,9 +116,9 @@ function afficherUsers(users) {
     let searchValue = ($('#user-search').val() || '').toLowerCase();
     let filtered = users.filter(function(user) {
         return (
-            user.name.toLowerCase().includes(searchValue) ||
-            user.email.toLowerCase().includes(searchValue) ||
-            user.address.city.toLowerCase().includes(searchValue)
+            (user.name || '').toLowerCase().includes(searchValue) ||
+            (user.email || '').toLowerCase().includes(searchValue) ||
+            (user.city ? user.city.toLowerCase() : (user.address && user.address.city ? user.address.city.toLowerCase() : '')).includes(searchValue)
         );
     });
 
@@ -109,12 +129,13 @@ function afficherUsers(users) {
     var html = '';
     for (var i = 0; i < filtered.length; i++) {
         var user = filtered[i];
-        var nomMaj = premiereLettreMaj(user.name.split(' ')[0]);
+        var nomMaj = premiereLettreMaj(user.name ? user.name.split(' ')[0] : '');
+        var ville = user.city || (user.address && user.address.city) || '';
         html += '<div class="user-card" data-user-id="' + user.id + '">';
         html += '  <div class="user-info">';
         html += '    <strong>' + nomMaj + '</strong><br>';
-        html += '    <span>' + user.email + '</span> | ';
-        html += '    <span>' + user.address.city + '</span>';
+        html += '    <span>' + (user.email || '') + '</span> | ';
+        html += '    <span>' + ville + '</span>';
         html += '  </div>';
         html += '  <div class="user-actions">';
         html += '    <button class="btn btn-comments" data-id="' + user.id + '">Voir commentaires</button>';
@@ -130,24 +151,59 @@ $(document).on('input', '#user-search', function() {
     afficherUsers(allUsers);
 });
 
-// Afficher les commentaires (table comments Supabase, filtré par user_id)
+// Afficher les commentaires sous la carte utilisateur (Supabase en priorité, fallback JSONPlaceholder)
 async function afficherCommentaires(userId) {
     $('.comments-bloc').remove();
     var userCard = $('.user-card[data-user-id="' + userId + '"]');
     if (userCard.length === 0) return;
     userCard.after('<div class="comments-bloc" style="min-height:70px;display:flex;align-items:center;"><div class="loader"></div></div>');
 
-    // On suppose que chaque commentaire a un champ user_id qui correspond à l'utilisateur
-    const { data, error } = await supabase
-        .from('comments')
-        .select('*')
-        .eq('user_id', userId);
-    if (error) {
-        userCard.next('.comments-bloc').html("<span class='error'>Erreur Supabase: impossible de charger les commentaires.</span>");
-        showToast("Erreur Supabase: " + error.message, "error");
-        return;
+    // --- Essaye de charger via Supabase ---
+    try {
+        const { data, error } = await supabase
+            .from('comments')
+            .select('*')
+            .eq('user_id', userId);
+        if (!error && data) {
+            afficherCommentairesPageSousCarte(data, userId, userCard);
+            return;
+        }
+    } catch (e) {
+        // Ignore, fallback JSONPlaceholder
     }
-    afficherCommentairesPageSousCarte(data, userId, userCard);
+    // Fallback JSONPlaceholder
+    $.ajax({
+        url: 'https://jsonplaceholder.typicode.com/posts?userId=' + userId,
+        method: 'GET',
+        success: function(posts) {
+            if (!posts || posts.length === 0) {
+                userCard.next('.comments-bloc').html('<em>Aucun post trouvé pour cet utilisateur.</em>');
+                return;
+            }
+            var postIds = posts.map(function(p) { return p.id; });
+            $.ajax({
+                url: 'https://jsonplaceholder.typicode.com/comments',
+                method: 'GET',
+                success: function(comments) {
+                    var userComments = [];
+                    for (var k = 0; k < comments.length; k++) {
+                        if (postIds.includes(comments[k].postId)) {
+                            userComments.push(comments[k]);
+                        }
+                    }
+                    afficherCommentairesPageSousCarte(userComments, userId, userCard);
+                },
+                error: function() {
+                    userCard.next('.comments-bloc').html("<span class='error'>Impossible de charger les commentaires.</span>");
+                    showToast("Erreur lors du chargement des commentaires.", "error");
+                }
+            });
+        },
+        error: function() {
+            userCard.next('.comments-bloc').html("<span class='error'>Erreur de connexion au serveur (posts).</span>");
+            showToast("Erreur lors du chargement des posts.", "error");
+        }
+    });
 }
 
 // Afficher les commentaires dans le bloc sous la carte
@@ -185,7 +241,7 @@ function afficherCommentairesPageSousCarte(comments, userId, userCard) {
     userCard.next('.comments-bloc').html(html);
 }
 
-// Sauvegarde des commentaires
+// Sauvegarde des commentaires (toujours côté local pour l'instant)
 $(document).on('click', '.btn-save-comments', function() {
     var userId = $(this).data('user');
     var comments = [];
@@ -205,7 +261,7 @@ $(document).on('click', '.btn-save-comments', function() {
     showToast("Commentaires sauvegardés avec succès !", "success");
 });
 
-// Ajout d'un nouveau commentaire
+// Ajout d'un nouveau commentaire (à migrer prochainement en INSERT Supabase)
 $(document).on('submit', '.add-comment-form', function(e) {
     e.preventDefault();
     var name = $(this).find('[name="name"]').val();
@@ -228,13 +284,13 @@ $(document).on('submit', '.add-comment-form', function(e) {
     showToast("Commentaire ajouté !", "success");
 });
 
-// Suppression d'un commentaire
+// Suppression d'un commentaire (à migrer prochainement en DELETE Supabase)
 $(document).on('click', '.btn-delete-comment', function() {
     $(this).closest('.comment-card').remove();
     showToast("Commentaire supprimé.", "info");
 });
 
-// Suppression d'un utilisateur
+// Suppression d'un utilisateur (à migrer prochainement en DELETE Supabase)
 $(document).on('click', '.btn-delete-user', function() {
     if (confirm('Supprimer cet utilisateur?')) {
         $(this).closest('.user-card').remove();
@@ -242,7 +298,7 @@ $(document).on('click', '.btn-delete-user', function() {
     }
 });
 
-// Édition d'un commentaire
+// Édition d'un commentaire (à migrer prochainement en UPDATE Supabase)
 $(document).on('click', '.btn-edit-comment', function() {
     var card = $(this).closest('.comment-card');
     var name = card.find('strong').text();
