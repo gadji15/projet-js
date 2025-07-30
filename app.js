@@ -11,7 +11,30 @@ $(document).ready(function() {
     // Pour voir si tout fonctionne
     console.log("La page est prete !"); 
 
-    
+    // Dark mode init
+    // Récupérer le choix stocké ou détecter le mode du navigateur
+    if (
+        localStorage.getItem("darkMode") === "true" ||
+        (localStorage.getItem("darkMode") === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    ) {
+        $("body").addClass("dark");
+    }
+    majBoutonDark();
+
+    // Toggle dark mode
+    $("#toggle-dark").on("click", function () {
+        $("body").toggleClass("dark");
+        localStorage.setItem("darkMode", $("body").hasClass("dark"));
+        majBoutonDark();
+    });
+    function majBoutonDark() {
+        if ($("body").hasClass("dark")) {
+            $("#toggle-dark").html("☀️ Mode clair");
+        } else {
+            $("#toggle-dark").html("🌙 Mode sombre");
+        }
+    }
+
     afficherUtilisateurs();
 
     // Gestion des clics sur les boutons

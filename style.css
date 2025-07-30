@@ -251,26 +251,101 @@ input:focus, textarea:focus {
     }
 }
 
-/* Dark mode (facultatif)
+/* ==== DARK MODE ==== */
 body.dark {
-    background: #222b3a;
-    color: #eee;
+    background: linear-gradient(135deg, #171e27 0%, #232c3d 100%);
+    color: #eaeaea;
+}
+body.dark header {
+    background: linear-gradient(90deg, #232c3d 60%, #171e27 100%);
+    color: #f1f1f1;
+    box-shadow: 0 2px 12px #0006;
 }
 body.dark main {
+    background: #202737;
+    color: #eaeaea;
+    box-shadow: 0 6px 28px 0 #0008;
+}
+body.dark .user-card {
+    background: #222b3a;
+    color: #f5f8fa;
+    box-shadow: 0 2px 14px #27ae6012;
+}
+body.dark .user-card:hover {
+    background: #26304c;
+    box-shadow: 0 7px 24px #3498db1a;
+}
+body.dark .user-info {
+    color: #ecf0f1;
+}
+body.dark .comments-bloc {
+    background: linear-gradient(90deg, #232c3d 65%, #19202a 100%);
+    color: #fff;
+    box-shadow: 0 1px 14px #27ae6022;
+}
+body.dark .comment-card {
     background: #232c3d;
-    color: #eee;
+    color: #fff;
+    border-left-color: #27ae60;
+    box-shadow: 0 1px 7px #0007;
 }
-body.dark header, body.dark footer {
-    background: #121722;
-    color: #ddd;
+body.dark .comment-card:hover {
+    box-shadow: 0 7px 24px #27ae6044;
+    border-left-color: #3498db;
 }
-body.dark .user-card,
-body.dark .comments-bloc,
-body.dark .comment-card,
-body.dark .add-comment-form,
-body.dark .edit-form {
-    background: #232c3d;
-    color: #eee;
-    border-color: #232c3d;
+body.dark .add-comment-form, body.dark .edit-form {
+    background: #222b3a;
+    color: #f1f1f1;
+    box-shadow: 0 2px 14px #0005;
 }
-*/
+body.dark input, body.dark textarea {
+    background: #2c3e50;
+    color: #f1f1f1;
+    border-color: #3498db33;
+}
+body.dark input:focus, body.dark textarea:focus {
+    border-color: #27ae60;
+}
+body.dark .btn {
+    background: #3498db;
+    color: #fff;
+}
+body.dark .btn-save {
+    background: #2ecc71;
+}
+body.dark .btn-hide {
+    background: #f39c12;
+}
+body.dark .btn-delete-user, 
+body.dark .btn-delete-comment {
+    background: #e74c3c;
+}
+body.dark .btn-edit-comment {
+    background: #f39c12;
+}
+body.dark .btn:hover, 
+body.dark .btn-save:hover, 
+body.dark .btn-hide:hover, 
+body.dark .btn-delete-user:hover,
+body.dark .btn-delete-comment:hover, 
+body.dark .btn-edit-comment:hover {
+    filter: brightness(1.15) contrast(1.2);
+}
+body.dark .error {
+    color: #ff7675;
+}
+body.dark footer {
+    background: #171e27;
+    color: #c7c7c7;
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+}
+body.dark .loader {
+    border: 4px solid #353b48;
+    border-top: 4px solid #27ae60;
+}
+body.dark .toast {
+    background: linear-gradient(90deg, #27ae60 70%, #232c3d 100%);
+    color: #fff;
+    box-shadow: 0 4px 20px #0007;
+}
