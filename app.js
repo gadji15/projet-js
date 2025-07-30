@@ -261,16 +261,55 @@ $(document).on('click', '.btn-save-comments', function() {
     showToast("Commentaires sauvegardés avec succès !", "success");
 });
 
-// Ajout d'un nouveau commentaire (à migrer prochainement en INSERT Supabase)
-$(document).on('submit', '.add-comment-form', function(e) {
+// Ajout d'un nouveau commentaire (INSERT réel Supabase si possible)
+$(document).on('submit', '.add-comment-form', async function(e) {
     e.preventDefault();
-    var name = $(this).find('[name="name"]').val();
-    var email = $(this).find('[name="email"]').val();
-    var content = $(this).find('[name="content"]').val();
-    if (!name || !email || !content) {
+    var $form = $(this);
+    var name = $form.find('[name="name"]').val();
+    var email = $form.find('[name="email"]').val();
+    var content = $form.find('[name="content"]').val();
+
+    // Trouver le user_id à partir du contexte
+    var $bloc = $form.closest('.comments-bloc');
+    var userCard = $bloc.prev('.user-card');
+    var userId = userCard.length ? userCard.data('user-id') : null;
+
+    if (!name || !email || !content || !userId) {
         showToast('Veuillez remplir tous les champs svp', "error");
         return;
     }
+
+    // Essayons d'insérer dans Supabase (table comments)
+    try {
+        showLoader();
+        const { error } = await supabase.from('comments').insert([
+            {
+                user_id: userId,
+                name: name,
+                email: email,
+                body: content
+            }
+        ]);
+        hideLoader();
+
+        if (error) {
+            showToast("Erreur Supabase: " + error.message, "error");
+            // Fallback local si tu veux garder le comportement précédent
+            ajouterCommentaireLocal(name, email, content);
+        } else {
+            showToast("Commentaire ajouté dans Supabase !", "success");
+            // Recharge la liste des commentaires pour voir le nouveau
+            afficherCommentaires(userId);
+        }
+    } catch (e) {
+        hideLoader();
+        showToast("Erreur réseau ou Supabase.", "error");
+        ajouterCommentaireLocal(name, email, content);
+    }
+    $form[0].reset();
+});
+
+function ajouterCommentaireLocal(name, email, content) {
     var newId = 'local_' + new Date().getTime();
     var newCommentHtml = '<div class="comment-card" data-comment-id="' + newId + '">';
     newCommentHtml += '<div><strong>' + name + '</strong>';
@@ -280,9 +319,7 @@ $(document).on('submit', '.add-comment-form', function(e) {
     newCommentHtml += '<div>' + content + '</div>';
     newCommentHtml += '</div>';
     $('.comments-list').prepend(newCommentHtml);
-    $(this)[0].reset();
-    showToast("Commentaire ajouté !", "success");
-});
+}
 
 // Suppression d'un commentaire (à migrer prochainement en DELETE Supabase)
 $(document).on('click', '.btn-delete-comment', function() {
