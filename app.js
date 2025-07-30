@@ -321,10 +321,39 @@ function ajouterCommentaireLocal(name, email, content) {
     $('.comments-list').prepend(newCommentHtml);
 }
 
-// Suppression d'un commentaire (à migrer prochainement en DELETE Supabase)
-$(document).on('click', '.btn-delete-comment', function() {
-    $(this).closest('.comment-card').remove();
-    showToast("Commentaire supprimé.", "info");
+// Suppression d'un commentaire (DELETE Supabase si id numérique réel)
+$(document).on('click', '.btn-delete-comment', async function() {
+    var $card = $(this).closest('.comment-card');
+    var commentId = $card.data('comment-id');
+    // Trouver le user_id pour rafraîchir après
+    var $bloc = $card.closest('.comments-bloc');
+    var userCard = $bloc.prev('.user-card');
+    var userId = userCard.length ? userCard.data('user-id') : null;
+
+    // Supabase : on ne supprime que si l'id est un nombre (sinon local)
+    if (commentId && !isNaN(Number(commentId))) {
+        try {
+            showLoader();
+            const { error } = await supabase.from('comments').delete().eq('id', commentId);
+            hideLoader();
+            if (error) {
+                showToast("Erreur Supabase: " + error.message, "error");
+                // Fallback suppression locale
+                $card.remove();
+            } else {
+                showToast("Commentaire supprimé (Supabase).", "success");
+                if (userId) afficherCommentaires(userId);
+            }
+        } catch (e) {
+            hideLoader();
+            showToast("Erreur réseau/Supabase.", "error");
+            $card.remove();
+        }
+    } else {
+        // Suppression locale (commentaires ajoutés localement)
+        $card.remove();
+        showToast("Commentaire supprimé (local).", "info");
+    }
 });
 
 // Suppression d'un utilisateur (à migrer prochainement en DELETE Supabase)
