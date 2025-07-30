@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Projet JavaScript - Gadji Cheikh Gaye</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="app.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Projet JavaScript - UADB</h1>
+        <p>
+            <strong>Étudiant :</strong> Cheikh Gaye Gadji <br>
+            <strong>Code permanent :</strong> 1820382<br>
+            <strong>Date de naissance :</strong> 15/03/2004
+        </p>
+        <!-- Toggle Dark Mode -->
+        <button id="toggle-dark" class="btn" style="margin-top:18px;float:right;position:absolute;right:30px;top:30px">
+            🌙 Mode sombre
+        </button>
+    </header>
+    <!--  -->
+    <main>
+        <!-- Loader global caché par défaut -->
+        <div id="global-loader" class="loader" style="display:none;"></div>
+
+        <section>
+            <h2>Utilisateurs</h2>
+            <!-- Barre de recherche moderne -->
+            <div style="margin-bottom:18px;display:flex;justify-content:flex-end;">
+                <input type="text" id="user-search" placeholder="🔍 Rechercher un utilisateur, email ou ville..." style="padding:10px 16px;border-radius:30px;border:1.5px solid #b5cde8;width:320px;max-width:100%;font-size:1em;box-shadow:0 1px 5px #2221;outline:none;transition:border 0.2s;">
+            </div>
+            <div id="users-list">
+                <!-- Contenu chargé dynamiquement -->
+            </div>
+        </section>
+        
+        <!-- La section #comments-section n'est plus utile : tout sera inséré juste sous la carte utilisateur -->
+    </main>
+    <!-- Toast notification -->
+    <div id="toast" class="toast" style="display:none;"></div>
+    
+    <footer>
+        <p>Université Alioune Diop de Bambey &copy; 2025</p>
+    </footer>
+</body>
+</html>
