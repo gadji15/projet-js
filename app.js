@@ -5,6 +5,11 @@
 // Toute la logique JS de l'application est ici.
 // Design moderne, loader, toast, dark mode, feedback utilisateur.
 
+// --- Initialisation Supabase ---
+const supabaseUrl = 'https://sjsdpshlwrzatknuzwli.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqc2Rwc2hsd3J6YXRrbnV6d2xpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM4Nzg1ODMsImV4cCI6MjA2OTQ1NDU4M30.cFclX5dq6-ifcrOcQfGPlvtdOirvZR7GNm0Pa5YDiXs';
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
 $(document).ready(function() {
     // Dark mode init
     if (
@@ -68,30 +73,18 @@ function showToast(message, type) {
 }
 
 // Charger et afficher les utilisateurs
-function afficherUtilisateurs() {
+async function afficherUtilisateurs() {
     showLoader();
     $('#users-list').html('');
-    var usersFromStorage = localStorage.getItem('users');
-    if (usersFromStorage) {
-        var users = JSON.parse(usersFromStorage);
-        afficherUsers(users);
-        hideLoader();
-    } else {
-        $.ajax({
-            url: 'https://jsonplaceholder.typicode.com/users',
-            method: 'GET',
-            success: function(data) {
-                localStorage.setItem('users', JSON.stringify(data));
-                afficherUsers(data);
-                hideLoader();
-            },
-            error: function() {
-                $('#users-list').html("<span class='error'>Erreur de connexion. Veuillez réessayer plus tard.</span>");
-                hideLoader();
-                showToast("Erreur lors du chargement des utilisateurs.", "error");
-            }
-        });
+    // --- Nouvelle version : chargement via Supabase ---
+    const { data, error } = await supabase.from('users').select('*');
+    hideLoader();
+    if (error) {
+        $('#users-list').html("<span class='error'>Erreur de connexion à Supabase.</span>");
+        showToast("Erreur Supabase: " + error.message, "error");
+        return;
     }
+    afficherUsers(data);
 }
 
 // Afficher les utilisateurs dans la page
@@ -137,45 +130,24 @@ $(document).on('input', '#user-search', function() {
     afficherUsers(allUsers);
 });
 
-// Afficher les commentaires sous la carte utilisateur
-function afficherCommentaires(userId) {
+// Afficher les commentaires (table comments Supabase, filtré par user_id)
+async function afficherCommentaires(userId) {
     $('.comments-bloc').remove();
     var userCard = $('.user-card[data-user-id="' + userId + '"]');
     if (userCard.length === 0) return;
     userCard.after('<div class="comments-bloc" style="min-height:70px;display:flex;align-items:center;"><div class="loader"></div></div>');
 
-    $.ajax({
-        url: 'https://jsonplaceholder.typicode.com/posts?userId=' + userId,
-        method: 'GET',
-        success: function(posts) {
-            if (!posts || posts.length === 0) {
-                userCard.next('.comments-bloc').html('<em>Aucun post trouvé pour cet utilisateur.</em>');
-                return;
-            }
-            var postIds = posts.map(function(p) { return p.id; });
-            $.ajax({
-                url: 'https://jsonplaceholder.typicode.com/comments',
-                method: 'GET',
-                success: function(comments) {
-                    var userComments = [];
-                    for (var k = 0; k < comments.length; k++) {
-                        if (postIds.includes(comments[k].postId)) {
-                            userComments.push(comments[k]);
-                        }
-                    }
-                    afficherCommentairesPageSousCarte(userComments, userId, userCard);
-                },
-                error: function() {
-                    userCard.next('.comments-bloc').html("<span class='error'>Impossible de charger les commentaires.</span>");
-                    showToast("Erreur lors du chargement des commentaires.", "error");
-                }
-            });
-        },
-        error: function() {
-            userCard.next('.comments-bloc').html("<span class='error'>Erreur de connexion au serveur (posts).</span>");
-            showToast("Erreur lors du chargement des posts.", "error");
-        }
-    });
+    // On suppose que chaque commentaire a un champ user_id qui correspond à l'utilisateur
+    const { data, error } = await supabase
+        .from('comments')
+        .select('*')
+        .eq('user_id', userId);
+    if (error) {
+        userCard.next('.comments-bloc').html("<span class='error'>Erreur Supabase: impossible de charger les commentaires.</span>");
+        showToast("Erreur Supabase: " + error.message, "error");
+        return;
+    }
+    afficherCommentairesPageSousCarte(data, userId, userCard);
 }
 
 // Afficher les commentaires dans le bloc sous la carte
