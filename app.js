@@ -380,18 +380,47 @@ $(document).on('click', '.btn-edit-comment', function() {
     card.append(formHtml);
 });
 
-// Validation de l'édition
-$(document).on('submit', '.edit-form', function(e) {
+// Validation de l'édition (UPDATE réel Supabase si possible)
+$(document).on('submit', '.edit-form', async function(e) {
     e.preventDefault();
-    var card = $(this).closest('.comment-card');
-    var name = $(this).find('[name="edit-name"]').val();
-    var email = $(this).find('[name="edit-email"]').val();
-    var content = $(this).find('[name="edit-content"]').val();
-    card.find('strong').text(name);
-    card.find('span').text(email);
-    card.find('div').last().text(content);
-    $(this).remove();
-    showToast("Commentaire modifié.", "success");
+    var $form = $(this);
+    var card = $form.closest('.comment-card');
+    var commentId = card.data('comment-id');
+    var name = $form.find('[name="edit-name"]').val();
+    var email = $form.find('[name="edit-email"]').val();
+    var content = $form.find('[name="edit-content"]').val();
+    // Trouver le user_id pour rafraîchir après
+    var $bloc = $form.closest('.comments-bloc');
+    var userCard = $bloc.prev('.user-card');
+    var userId = userCard.length ? userCard.data('user-id') : null;
+
+    if (commentId && !isNaN(Number(commentId))) {
+        try {
+            showLoader();
+            const { error } = await supabase
+                .from('comments')
+                .update({ name: name, email: email, body: content })
+                .eq('id', commentId);
+            hideLoader();
+            if (error) {
+                showToast("Erreur Supabase: " + error.message, "error");
+            } else {
+                showToast("Commentaire modifié (Supabase).", "success");
+                if (userId) afficherCommentaires(userId);
+            }
+        } catch (e) {
+            hideLoader();
+            showToast("Erreur réseau/Supabase.", "error");
+        }
+        $form.remove();
+    } else {
+        // Edition locale (commentaires locaux)
+        card.find('strong').text(name);
+        card.find('span').text(email);
+        card.find('div').last().text(content);
+        $form.remove();
+        showToast("Commentaire modifié (local).", "success");
+    }
 });
 
 // Annulation de l'édition
