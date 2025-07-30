@@ -95,14 +95,27 @@ function afficherUtilisateurs() {
 }
 
 // Afficher les utilisateurs dans la page
+let allUsers = []; // Pour le filtrage global
+
 function afficherUsers(users) {
-    if (!users || users.length === 0) {
+    allUsers = users; // Mémorise la liste pour la recherche instantanée
+
+    let searchValue = ($('#user-search').val() || '').toLowerCase();
+    let filtered = users.filter(function(user) {
+        return (
+            user.name.toLowerCase().includes(searchValue) ||
+            user.email.toLowerCase().includes(searchValue) ||
+            user.address.city.toLowerCase().includes(searchValue)
+        );
+    });
+
+    if (!filtered || filtered.length === 0) {
         $('#users-list').html("<em>Aucun utilisateur trouvé</em>");
         return;
     }
     var html = '';
-    for (var i = 0; i < users.length; i++) {
-        var user = users[i];
+    for (var i = 0; i < filtered.length; i++) {
+        var user = filtered[i];
         var nomMaj = premiereLettreMaj(user.name.split(' ')[0]);
         html += '<div class="user-card" data-user-id="' + user.id + '">';
         html += '  <div class="user-info">';
@@ -118,6 +131,11 @@ function afficherUsers(users) {
     }
     $('#users-list').html(html);
 }
+
+// Recherche instantanée utilisateurs
+$(document).on('input', '#user-search', function() {
+    afficherUsers(allUsers);
+});
 
 // Afficher les commentaires sous la carte utilisateur
 function afficherCommentaires(userId) {
